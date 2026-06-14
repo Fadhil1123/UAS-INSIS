@@ -15,9 +15,9 @@
     @csrf
 
     <input
-        type="email"
-        name="email"
-        placeholder="Email">
+        type="text"
+        name="nomor_induk"
+        placeholder="NIM / NIP">
 
     <br><br>
 

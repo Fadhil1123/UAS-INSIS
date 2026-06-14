@@ -15,7 +15,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
+            'nomor_induk' => 'required',
             'password' => 'required'
         ]);
 
@@ -34,7 +34,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah'
+            'email' => 'Nomor induk atau password salah'
         ]);
     }
 
