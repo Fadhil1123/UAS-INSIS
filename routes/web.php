@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BookingManagementController;
 use App\Http\Controllers\RoomController;
 
 Route::middleware('guest')->group(function () {
@@ -41,6 +42,9 @@ Route::middleware([
         [DashboardController::class, 'admin']
     );
 
+    Route::get('/admin/bookings', [BookingManagementController::class, 'adminIndex'])->name('admin.bookings.index');
+    Route::patch('/admin/bookings/{id}/approve', [BookingManagementController::class, 'approve'])->name('admin.bookings.approve');
+    Route::patch('/admin/bookings/{id}/reject', [BookingManagementController::class, 'reject'])->name('admin.bookings.reject');
     Route::resource(
         'admin/rooms',
         RoomController::class
