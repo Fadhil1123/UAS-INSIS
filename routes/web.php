@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RoomController;
 
 Route::middleware('guest')->group(function () {
 
@@ -38,5 +39,10 @@ Route::middleware([
     Route::get(
         '/admin/dashboard',
         [DashboardController::class, 'admin']
+    );
+
+    Route::resource(
+        'admin/rooms',
+        RoomController::class
     );
 });
