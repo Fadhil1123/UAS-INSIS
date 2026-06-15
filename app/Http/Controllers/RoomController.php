@@ -24,12 +24,27 @@ class RoomController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+            $validated = $request->validate(
+        [
             'room_code' => 'required|unique:rooms',
             'room_name' => 'required',
-            'category' => 'required',
+            'category' => 'required|in:kelas,laboratorium,aula',
             'capacity' => 'required|integer|min:1',
-        ]);
+        ],
+        [
+            'room_code.required' => 'Kode ruangan wajib diisi.',
+            'room_code.unique' => 'Kode ruangan sudah digunakan.',
+
+            'room_name.required' => 'Nama ruangan wajib diisi.',
+
+            'category.required' => 'Kategori wajib dipilih.',
+            'category.in' => 'Kategori tidak valid.',
+
+            'capacity.required' => 'Kapasitas wajib diisi.',
+            'capacity.integer' => 'Kapasitas harus berupa angka.',
+            'capacity.min' => 'Kapasitas minimal 1.',
+        ]
+    );
 
         Room::create($validated);
 
@@ -47,21 +62,31 @@ class RoomController extends Controller
     }
 
     public function update(
-        Request $request,
-        Room $room
+    Request $request,
+    Room $room
     )
     {
-        $validated = $request->validate([
-            'room_code' =>
-                'required|unique:rooms,room_code,' .
-                $room->id,
+        $validated = $request->validate(
+            [
+                'room_code' => 'required|unique:rooms,room_code,' . $room->id,
+                'room_name' => 'required',
+                'category' => 'required|in:kelas,laboratorium,aula',
+                'capacity' => 'required|integer|min:1',
+            ],
+            [
+                'room_code.required' => 'Kode ruangan wajib diisi.',
+                'room_code.unique' => 'Kode ruangan sudah digunakan.',
 
-            'room_name' => 'required',
+                'room_name.required' => 'Nama ruangan wajib diisi.',
 
-            'category' => 'required',
+                'category.required' => 'Kategori wajib dipilih.',
+                'category.in' => 'Kategori tidak valid.',
 
-            'capacity' => 'required|integer|min:1',
-        ]);
+                'capacity.required' => 'Kapasitas wajib diisi.',
+                'capacity.integer' => 'Kapasitas harus berupa angka.',
+                'capacity.min' => 'Kapasitas minimal 1.',
+            ]
+        );
 
         $room->update($validated);
 
