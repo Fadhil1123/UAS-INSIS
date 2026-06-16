@@ -7,8 +7,18 @@ use App\Models\Booking;
 use App\Models\ScheduleCache;
 use App\Models\Room;
 
+use Inertia\Inertia;
+
 class CalendarController extends Controller
 {
+    public function index()
+    {
+        $rooms = Room::select('id', 'room_name', 'room_code')->get();
+        return Inertia::render('Calendar/Index', [
+            'rooms' => $rooms
+        ]);
+    }
+
     public function getEvents(Request $request)
     {
         // Tangkap parameter filter ruangan dari Frontend (jika ada)
