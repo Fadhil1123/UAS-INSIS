@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BookingManagementController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\BookingController;
 
 Route::middleware('guest')->group(function () {
 
@@ -29,12 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/dashboard',
         [DashboardController::class, 'index']
-    );
-
-    Route::get(
-        '/rooms',
-        [RoomController::class, 'index']
-    )->name('rooms.index');
+    )->name('dashboard');
 });
 
 Route::middleware([
@@ -54,4 +50,27 @@ Route::middleware([
         'admin/rooms',
         RoomController::class
     );
+});
+
+Route::middleware('auth')->group(function () {
+
+    Route::post(
+        '/logout',
+        [AuthController::class, 'logout']
+    );
+
+    Route::get(
+        '/dashboard',
+        [DashboardController::class, 'index']
+    )->name('dashboard');
+
+    Route::get(
+        '/bookings/create',
+        [BookingController::class, 'create']
+    )->name('bookings.create');
+
+    Route::post(
+        '/bookings',
+        [BookingController::class, 'store']
+    )->name('bookings.store');
 });
