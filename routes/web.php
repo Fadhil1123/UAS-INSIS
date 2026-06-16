@@ -30,6 +30,11 @@ Route::middleware('auth')->group(function () {
         '/dashboard',
         [DashboardController::class, 'index']
     );
+
+    Route::get(
+        '/rooms',
+        [RoomController::class, 'index']
+    )->name('rooms.index');
 });
 
 Route::middleware([
