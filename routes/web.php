@@ -34,6 +34,11 @@ Route::middleware('auth')->group(function () {
     )->name('dashboard');
 
     Route::get(
+        '/calendar',
+        [CalendarController::class, 'index']
+    )->name('calendar.index');
+
+    Route::get(
         '/calendar/events', 
         [CalendarController::class, 'getEvents']
     )->name('calendar.events');
