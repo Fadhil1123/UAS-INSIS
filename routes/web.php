@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BookingManagementController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\BookingController;
 
 Route::middleware('guest')->group(function () {
 
@@ -30,6 +31,16 @@ Route::middleware('auth')->group(function () {
         '/dashboard',
         [DashboardController::class, 'index']
     );
+
+    Route::get(
+        '/bookings/create',
+        [BookingController::class, 'create']
+    )->name('bookings.create');
+
+    Route::post(
+        '/bookings',
+        [BookingController::class, 'store']
+    )->name('bookings.store');
 });
 
 Route::middleware([
