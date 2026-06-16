@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BookingManagementController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CalendarController;
 
 Route::middleware('guest')->group(function () {
 
@@ -31,6 +32,11 @@ Route::middleware('auth')->group(function () {
         '/dashboard',
         [DashboardController::class, 'index']
     )->name('dashboard');
+
+    Route::get(
+        '/calendar/events', 
+        [CalendarController::class, 'getEvents']
+    )->name('calendar.events');
 });
 
 Route::middleware([
