@@ -30,17 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get(
         '/dashboard',
         [DashboardController::class, 'index']
-    );
-
-    Route::get(
-        '/bookings/create',
-        [BookingController::class, 'create']
-    )->name('bookings.create');
-
-    Route::post(
-        '/bookings',
-        [BookingController::class, 'store']
-    )->name('bookings.store');
+    )->name('dashboard');
 });
 
 Route::middleware([
@@ -60,4 +50,27 @@ Route::middleware([
         'admin/rooms',
         RoomController::class
     );
+});
+
+Route::middleware('auth')->group(function () {
+
+    Route::post(
+        '/logout',
+        [AuthController::class, 'logout']
+    );
+
+    Route::get(
+        '/dashboard',
+        [DashboardController::class, 'index']
+    )->name('dashboard');
+
+    Route::get(
+        '/bookings/create',
+        [BookingController::class, 'create']
+    )->name('bookings.create');
+
+    Route::post(
+        '/bookings',
+        [BookingController::class, 'store']
+    )->name('bookings.store');
 });

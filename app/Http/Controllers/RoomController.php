@@ -4,17 +4,28 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class RoomController extends Controller
 {
     public function index()
     {
-        $rooms = Room::latest()->get();
+        $rooms = Room::latest()->get()->map(function ($room) {
+            return [
+                'id' => $room->id,
+                'room_code' => $room->room_code,
+                'room_name' => $room->room_name,
+                'category' => $room->category,
+                'capacity' => $room->capacity,
+                'photo_path' => $room->photo,
+                'description' => $room->description,
+                'status' => $room->is_active ? 'aktif' : 'nonaktif',
+            ];
+        });
 
-        return view(
-            'rooms.index',
-            compact('rooms')
-        );
+        return Inertia::render('Rooms/Index', [
+            'rooms' => $rooms
+        ]);
     }
 
     public function create()
