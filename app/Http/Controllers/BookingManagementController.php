@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Booking; // <-- Import Model Booking
+use App\Models\Booking;
+use App\Services\WhatsAppService;
 
 class BookingManagementController extends Controller
 {
@@ -59,7 +60,7 @@ class BookingManagementController extends Controller
     }
 
     // 5. ADMIN MENYETUJUI BOOKING (Approve)
-    public function approve($id)
+    public function approve($id, WhatsAppService $waService) // <-- Ditambahkan WhatsAppService di sini
     {
         $booking = Booking::findOrFail($id);
         
@@ -67,13 +68,25 @@ class BookingManagementController extends Controller
             'status' => 'approved'
         ]);
 
-        // [TEMPAT TRIGGER WHATSAPP BE-08 NANTI DI SINI]
+        // --- TRIGGER WHATSAPP BE-08 ---
+        // Mengambil nomor HP user. Sesuaikan 'phone' dengan nama kolom asli di tabel users kelompok Anda (misal: no_hp)
+        $noHpUser = $booking->user->phone ?? '081234567890'; 
+        
+        $pesanTemplate = "Halo {$booking->user->name},\n\n"
+                       . "Pengajuan peminjaman ruangan Anda untuk kegiatan *\"{$booking->purpose}\"* telah *DISETUJUI* oleh Admin.\n\n"
+                       . "Detail Kegiatan:\n"
+                       . "🗓️ Tanggal: {$booking->booking_date}\n"
+                       . "⏰ Waktu: {$booking->start_time} - {$booking->end_time}\n\n"
+                       . "Silakan gunakan ruangan dengan tertib. Terima kasih.";
+
+        // Kirim pesan lewat service yang sudah kita buat
+        $waService->sendMessage($noHpUser, $pesanTemplate);
 
         return redirect()->route('admin.bookings.index')->with('success', 'Booking berhasil disetujui.');
     }
 
     // 6. ADMIN MENOLAK BOOKING (Reject)
-    public function reject(Request $request, $id)
+    public function reject(Request $request, $id, WhatsAppService $waService) // <-- Ditambahkan WhatsAppService di sini
     {
         // Validasi agar alasan penolakan wajib diisi oleh admin di form
         $request->validate([
@@ -84,10 +97,18 @@ class BookingManagementController extends Controller
         
         $booking->update([
             'status' => 'rejected',
-            'rejection_reason' => $request->rejection_reason // Mengisi kolom alasan sesuai input admin
+            'rejection_reason' => $request->rejection_reason
         ]);
 
-        // [TEMPAT TRIGGER WHATSAPP BE-08 NANTI DI SINI]
+        // --- TRIGGER WHATSAPP BE-08 ---
+        $noHpUser = $booking->user->phone ?? '081234567890';
+        
+        $pesanTemplate = "Halo {$booking->user->name},\n\n"
+                       . "Mohon maaf, pengajuan peminjaman ruangan Anda untuk kegiatan *\"{$booking->purpose}\"* telah *DITOLAK* oleh Admin.\n\n"
+                       . "❌ *Alasan Penolakan:* {$request->rejection_reason}\n\n"
+                       . "Silakan ajukan kembali dengan menyesuaikan jadwal atau ruangan lain. Terima kasih.";
+
+        $waService->sendMessage($noHpUser, $pesanTemplate);
 
         return redirect()->route('admin.bookings.index')->with('success', 'Booking telah ditolak.');
     }
