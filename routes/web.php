@@ -8,6 +8,10 @@ use App\Http\Controllers\RoomController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CalendarController;
 
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
 Route::middleware('guest')->group(function () {
 
     Route::get(

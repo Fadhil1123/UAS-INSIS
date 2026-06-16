@@ -19,6 +19,7 @@ class BookingDummySeeder extends Seeder
             'purpose' => 'Rapat Koordinasi Panitia UAS',
             'status' => 'pending',
             'rejection_reason' => null,
+            'booking_type' => 'umum',
         ]);
 
         // Dummy 2: Status Approved
@@ -31,6 +32,7 @@ class BookingDummySeeder extends Seeder
             'purpose' => 'Kuliah Pengganti Integrasi Sistem',
             'status' => 'approved',
             'rejection_reason' => null,
+            'booking_type' => 'umum',
         ]);
 
         // Dummy 3: Status Rejected
@@ -43,6 +45,7 @@ class BookingDummySeeder extends Seeder
             'purpose' => 'Seminar Komunitas Koding',
             'status' => 'rejected',
             'rejection_reason' => 'Ruangan pada jam tersebut mati lampu / sedang perbaikan AC.',
+            'booking_type' => 'umum',
         ]);
     }
 }
