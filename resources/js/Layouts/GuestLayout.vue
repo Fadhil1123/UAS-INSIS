@@ -18,10 +18,10 @@
         </svg>
       </div>
       <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-200 via-white to-purple-200 bg-clip-text text-transparent">
-        SIMARI ROOMS
+        SIJAMAL
       </h1>
-      <p class="text-xs text-slate-400 mt-2 font-medium tracking-widest uppercase">
-        Sistem Peminjaman Ruangan Terintegrasi
+      <p class="text-[10px] text-slate-400 mt-2 font-semibold tracking-wider uppercase max-w-xs mx-auto leading-normal">
+        Sistem Informasi Jadwal & Manajemen Alokasi Ruangan
       </p>
     </div>
 

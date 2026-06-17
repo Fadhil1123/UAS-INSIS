@@ -25,7 +25,7 @@
             </div>
             <div>
               <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-slate-950 to-slate-700 bg-clip-text text-transparent">
-                SIMARI ROOMS
+                SIJAMAL
               </span>
               <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
                 PRODI TI
