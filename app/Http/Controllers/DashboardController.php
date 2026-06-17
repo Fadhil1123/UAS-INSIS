@@ -13,6 +13,10 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
 
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+
         $stats = [
             'my_bookings_count' => Booking::where('user_id', $user->id)->count(),
             'approved_bookings_count' => Booking::where('user_id', $user->id)->where('status', 'approved')->count(),
