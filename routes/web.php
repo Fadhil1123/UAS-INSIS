@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
     Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {

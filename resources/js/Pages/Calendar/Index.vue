@@ -14,9 +14,19 @@
         <p class="relative text-slate-500 text-sm mt-1.5 font-medium">Pantau jadwal kuliah dan ketersediaan ruangan secara real-time.</p>
       </div>
 
-      <!-- Room Filter Dropdown -->
-      <div class="flex items-center gap-3 relative z-20">
-        <div class="relative min-w-[240px]">
+      <!-- Room Filter Dropdown & Peminjaman Button -->
+      <div class="flex items-center gap-3 relative z-20 w-full md:w-auto">
+        <Link 
+          v-if="userRole !== 'admin'"
+          href="/bookings/create" 
+          class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm shadow-md shadow-indigo-600/10 transition-colors cursor-pointer"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Ajukan Peminjaman
+        </Link>
+        <div class="relative min-w-[240px] flex-1 md:flex-initial">
           <select 
             v-model="selectedRoom" 
             @change="fetchEvents"
@@ -97,8 +107,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { usePage } from '@inertiajs/vue3'
+import { ref, onMounted, computed } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 
 // FullCalendar Imports
@@ -108,6 +118,7 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 
 const page = usePage()
+const userRole = computed(() => page.props.auth?.user?.role || 'guest')
 const rooms = page.props.rooms || []
 
 const selectedRoom = ref('')
