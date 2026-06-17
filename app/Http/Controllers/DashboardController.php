@@ -41,9 +41,24 @@ class DashboardController extends Controller
                 ];
             });
 
+        $featuredRooms = Room::where('is_active', true)
+            ->take(3)
+            ->get()
+            ->map(function ($room) {
+                return [
+                    'id' => $room->id,
+                    'room_code' => $room->room_code,
+                    'room_name' => $room->room_name,
+                    'category' => $room->category,
+                    'capacity' => $room->capacity,
+                    'photo_path' => $room->photo,
+                ];
+            });
+
         return Inertia::render('Dashboard', [
             'stats' => $stats,
             'upcomingBookings' => $upcomingBookings,
+            'featuredRooms' => $featuredRooms,
         ]);
     }
 

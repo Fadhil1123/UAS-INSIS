@@ -156,6 +156,77 @@
         </div>
       </div>
     </div>
+
+    <!-- Informasi Ruangan Unggulan Section -->
+    <div class="mt-8 bg-white rounded-3xl border border-slate-200/80 shadow-xs p-6">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
+          </svg>
+          Informasi Ruangan Tersedia
+        </h2>
+        <Link href="/rooms" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors">
+          Lihat Semua Ruangan →
+        </Link>
+      </div>
+
+      <!-- Rooms Grid -->
+      <div v-if="featuredRooms && featuredRooms.length > 0" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div 
+          v-for="room in featuredRooms" 
+          :key="room.id"
+          class="bg-slate-50/50 rounded-2xl border border-slate-200/50 hover:border-indigo-100 transition-all duration-300 overflow-hidden flex flex-col group"
+        >
+          <!-- Room image or placeholder -->
+          <div class="aspect-video bg-slate-100 relative overflow-hidden">
+            <img 
+              v-if="room.photo_path" 
+              :src="'/storage/' + room.photo_path" 
+              :alt="room.room_name" 
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div v-else class="w-full h-full flex items-center justify-center text-slate-400 bg-gradient-to-br from-slate-100 to-slate-200">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
+              </svg>
+            </div>
+            <div class="absolute bottom-3 left-3">
+              <span class="px-2 py-0.5 text-[10px] font-bold text-white bg-slate-900/60 backdrop-blur-md rounded-md uppercase">
+                {{ room.category }}
+              </span>
+            </div>
+          </div>
+          
+          <!-- Room details -->
+          <div class="p-4 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100/50 px-1.5 py-0.5 rounded-md">{{ room.room_code }}</span>
+                <span class="text-xs font-semibold text-slate-500">Kapasitas: {{ room.capacity }} orang</span>
+              </div>
+              <h4 class="font-bold text-slate-800 line-clamp-1 group-hover:text-indigo-600 transition-colors">{{ room.room_name }}</h4>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100">
+              <Link 
+                :href="'/calendar?room_id=' + room.room_code"
+                class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-[11px] shadow-sm transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Pilih & Cek Kalender
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Empty state rooms -->
+      <div v-else class="text-center py-6 text-slate-400 text-xs font-semibold">
+        Belum ada data ruangan tersedia.
+      </div>
+    </div>
   </AuthenticatedLayout>
 </template>
 
@@ -184,6 +255,10 @@ const props = defineProps({
     })
   },
   upcomingBookings: {
+    type: Array,
+    default: () => []
+  },
+  featuredRooms: {
     type: Array,
     default: () => []
   }
