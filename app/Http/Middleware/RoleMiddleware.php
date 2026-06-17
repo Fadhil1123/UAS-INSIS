@@ -18,10 +18,13 @@ class RoleMiddleware
             return redirect('/login');
         }
 
-        if(!in_array(
-            auth()->user()->role,
+        $currentRole = strtolower(trim((string) auth()->user()->role));
+        $allowedRoles = array_map(
+            fn ($role) => strtolower(trim((string) $role)),
             $roles
-        ))
+        );
+
+        if(!in_array($currentRole, $allowedRoles, true))
         {
             abort(403);
         }

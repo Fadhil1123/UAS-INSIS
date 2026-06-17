@@ -25,7 +25,7 @@
             </div>
             <div>
               <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-slate-950 to-slate-700 bg-clip-text text-transparent">
-                SIMARI ROOMS
+                SIJAMAL
               </span>
               <span class="hidden sm:inline-block ml-2 px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase bg-indigo-50 text-indigo-600 rounded-full border border-indigo-100">
                 PRODI TI
@@ -36,14 +36,6 @@
 
         <!-- User Actions -->
         <div class="flex items-center gap-4">
-          <!-- Notification Bell (Placeholder for now) -->
-          <button class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all relative">
-            <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white"></span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-          </button>
-
           <!-- User Menu Dropdown -->
           <div class="relative">
             <button 
@@ -305,8 +297,11 @@ const adminItems = [
 
 const isCurrentUrl = (href) => {
   const url = page.url
-  if (href === '/dashboard' || href === '/admin/dashboard') {
-    return url === '/dashboard' || url === '/admin/dashboard'
+  if (href === '/admin/dashboard') {
+    return url === '/admin/dashboard'
+  }
+  if (href === '/dashboard') {
+    return url === '/dashboard'
   }
   return url.startsWith(href)
 }

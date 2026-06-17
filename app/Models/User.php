@@ -21,6 +21,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'nomor_induk',
+        'phone_number',
         'email',
         'password',
         'role',
@@ -51,16 +52,16 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return $this->role === 'admin';
+        return strtolower(trim((string) $this->role)) === 'admin';
     }
 
     public function isDosen()
     {
-        return $this->role === 'dosen';
+        return strtolower(trim((string) $this->role)) === 'dosen';
     }
 
     public function isMahasiswa()
     {
-        return $this->role === 'mahasiswa';
+        return strtolower(trim((string) $this->role)) === 'mahasiswa';
     }
 }

@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        'gateway_url' => env('WA_GATEWAY_URL'),
+        'token' => env('WA_GATEWAY_TOKEN'),
+        'admin_number' => env('ADMIN_PHONE_NUMBER'),
+    ],
+
 ];

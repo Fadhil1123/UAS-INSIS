@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Booking; // <-- Import Model Booking
 use Illuminate\Support\Facades\Storage;
+use App\Models\Booking;
+use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class BookingManagementController extends Controller
@@ -33,6 +36,22 @@ class BookingManagementController extends Controller
 
         return Inertia::render('Bookings/History', [
             'bookings' => $bookings,
+                    'id'               => $booking->id,
+                    'room_name'        => $booking->room->room_name ?? '-',
+                    'room_code'        => $booking->room->room_code ?? '-',
+                    'booking_type'     => $booking->booking_type,
+                    'booking_date'     => $booking->booking_date,
+                    'start_time'       => $booking->start_time,
+                    'end_time'         => $booking->end_time,
+                    'purpose'          => $booking->purpose,
+                    'status'           => $booking->status,
+                    'rejection_reason' => $booking->rejection_reason,
+                    'created_at'       => $booking->created_at->format('d M Y'),
+                ];
+            });
+
+        return Inertia::render('Booking/History', [
+            'bookings' => $bookings
         ]);
     }
 
@@ -60,7 +79,7 @@ class BookingManagementController extends Controller
             'status' => 'cancelled'
         ]);
 
-        return redirect()->route('booking.history')->with('success', 'Booking berhasil dibatalkan.');
+        return redirect()->route('bookings.history')->with('success', 'Booking berhasil dibatalkan.');
     }
 
     // 4. TAMPILKAN DAFTAR PENGAJUAN MASUK DI HALAMAN ADMIN
@@ -70,41 +89,97 @@ class BookingManagementController extends Controller
         $bookings = Booking::with(['user', 'room'])
             ->where('status', 'pending')
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'id'               => $booking->id,
+                    'user_name'        => $booking->user->name ?? 'Unknown',
+                    'user_nomor_induk' => $booking->user->nomor_induk ?? '-',
+                    'user_phone'       => $booking->user->phone_number ?? '-',
+                    'room_name'        => $booking->room->room_name ?? '-',
+                    'room_code'        => $booking->room->room_code ?? '-',
+                    'booking_type'     => $booking->booking_type,
+                    'booking_date'     => $booking->booking_date,
+                    'start_time'       => $booking->start_time,
+                    'end_time'         => $booking->end_time,
+                    'purpose'          => $booking->purpose,
+                    'status'           => $booking->status,
+                    'created_at'       => $booking->created_at->format('d M Y, H:i'),
+                ];
+            });
 
-        return view('admin.bookings.index', compact('bookings'));
+        return Inertia::render('Admin/Bookings/Index', [
+            'bookings' => $bookings
+        ]);
     }
 
     // 5. ADMIN MENYETUJUI BOOKING (Approve)
-    public function approve($id)
+    public function approve($id, WhatsAppService $waService)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with([
+            'user',
+            'room'
+        ])->findOrFail($id);
+
+        if ($booking->status !== 'pending') {
+            return redirect()->route('admin.bookings.index')->with('error', 'Booking hanya bisa diproses dari status pending.');
+        }
         
         $booking->update([
             'status' => 'approved'
         ]);
 
-        // [TEMPAT TRIGGER WHATSAPP BE-08 NANTI DI SINI]
+        $noHpUser = $booking->user->phone_number;
+        
+        $pesanTemplate = "Halo {$booking->user->name},\n\n"
+                       . "Pengajuan peminjaman ruangan Anda untuk kegiatan *\"{$booking->purpose}\"* telah *DISETUJUI* oleh Admin.\n\n"
+                        . "Detail Kegiatan:\n"
+                        . "🗓️ Tanggal: {$booking->booking_date}\n"
+                        . "⏰ Waktu: {$booking->start_time} - {$booking->end_time}\n\n"
+                        . "Silakan gunakan ruangan dengan tertib. Terima kasih.";
+
+        if (!empty($noHpUser)) {
+            $waService->sendMessage($noHpUser, $pesanTemplate);
+        } else {
+            Log::warning("Booking #{$booking->id} disetujui, tetapi nomor WhatsApp user kosong.");
+        }
 
         return redirect()->route('admin.bookings.index')->with('success', 'Booking berhasil disetujui.');
     }
 
     // 6. ADMIN MENOLAK BOOKING (Reject)
-    public function reject(Request $request, $id)
+    public function reject(Request $request, $id, WhatsAppService $waService)
     {
-        // Validasi agar alasan penolakan wajib diisi oleh admin di form
         $request->validate([
             'rejection_reason' => 'required|string|max:500'
         ]);
 
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::with([
+            'user',
+            'room'
+        ])->findOrFail($id);
+
+        if ($booking->status !== 'pending') {
+            return redirect()->route('admin.bookings.index')->with('error', 'Booking hanya bisa diproses dari status pending.');
+        }
         
         $booking->update([
             'status' => 'rejected',
-            'rejection_reason' => $request->rejection_reason // Mengisi kolom alasan sesuai input admin
+            'rejection_reason' => $request->rejection_reason
         ]);
 
-        // [TEMPAT TRIGGER WHATSAPP BE-08 NANTI DI SINI]
+        $noHpUser = $booking->user->phone_number;
+        
+        $pesanTemplate = "Halo {$booking->user->name},\n\n"
+                       . "Mohon maaf, pengajuan peminjaman ruangan Anda untuk kegiatan *\"{$booking->purpose}\"* telah *DITOLAK* oleh Admin.\n\n"
+                       . "❌ *Alasan Penolakan:* {$request->rejection_reason}\n\n"
+                        . "Silakan ajukan kembali dengan menyesuaikan jadwal atau ruangan lain. Terima kasih.";
+
+        if (!empty($noHpUser)) {
+            $waService->sendMessage($noHpUser, $pesanTemplate);
+        } else {
+            Log::warning("Booking #{$booking->id} ditolak, tetapi nomor WhatsApp user kosong.");
+        }
 
         return redirect()->route('admin.bookings.index')->with('success', 'Booking telah ditolak.');
     }

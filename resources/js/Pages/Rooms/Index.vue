@@ -19,10 +19,45 @@
       </div>
     </div>
 
+    <!-- Filters and Search Bar Section -->
+    <div class="mb-8 flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
+      <!-- Category Filter Tabs -->
+      <div class="flex flex-wrap gap-1.5 w-full md:w-auto">
+        <button 
+          v-for="cat in ['semua', 'kelas', 'laboratorium', 'aula']" 
+          :key="cat"
+          @click="selectedCategory = cat"
+          :class="[
+            'px-4 py-2 text-xs font-bold rounded-xl transition-all capitalize cursor-pointer',
+            selectedCategory === cat
+              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/10'
+              : 'text-slate-600 hover:bg-slate-50'
+          ]"
+        >
+          {{ cat }}
+        </button>
+      </div>
+
+      <!-- Real-time Search Input -->
+      <div class="relative w-full md:w-80">
+        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          v-model="searchQuery"
+          placeholder="Cari kode atau nama ruangan..."
+          class="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white rounded-xl text-xs text-slate-700 transition-all font-medium"
+        />
+      </div>
+    </div>
+
     <!-- Room List Cards Grid -->
-    <div v-if="rooms && rooms.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div v-if="filteredRooms && filteredRooms.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div 
-        v-for="room in rooms" 
+        v-for="room in filteredRooms" 
         :key="room.id"
         class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col justify-between group hover:shadow-md hover:border-indigo-200 transition-all duration-300"
       >
@@ -56,7 +91,7 @@
           
           <!-- Category Tag -->
           <div class="absolute bottom-4 left-4">
-            <span class="px-2.5 py-1 text-xs font-bold text-white bg-slate-900/60 backdrop-blur-md rounded-lg">
+            <span class="px-2.5 py-1 text-xs font-bold text-white bg-slate-900/60 backdrop-blur-md rounded-lg uppercase">
               {{ room.category || 'Ruangan' }}
             </span>
           </div>
@@ -127,8 +162,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
         </svg>
       </div>
-      <h3 class="text-lg font-bold text-slate-800">Belum ada data ruangan</h3>
-      <p class="text-slate-400 text-sm mt-1 max-w-sm mx-auto">Silakan hubungi administrator program studi atau tambahkan ruangan jika Anda masuk sebagai admin.</p>
+      <h3 class="text-lg font-bold text-slate-800">Tidak ada data ruangan</h3>
+      <p class="text-slate-400 text-sm mt-1 max-w-sm mx-auto">Tidak ditemukan ruangan yang cocok dengan kriteria pencarian atau filter Anda.</p>
     </div>
 
     <!-- Detail Modal -->
@@ -168,7 +203,7 @@
             </div>
             
             <div class="absolute bottom-4 left-6 flex items-center gap-3">
-              <span class="px-2.5 py-1 text-xs font-bold text-white bg-slate-900/60 backdrop-blur-md rounded-lg">
+              <span class="px-2.5 py-1 text-xs font-bold text-white bg-slate-900/60 backdrop-blur-md rounded-lg uppercase">
                 {{ selectedRoom.category || 'Ruangan' }}
               </span>
               <span 
@@ -196,10 +231,27 @@
             </div>
 
             <div>
-              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Deskripsi & Kelengkapan</h4>
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Deskripsi</h4>
               <p class="text-sm text-slate-600 leading-relaxed">
                 {{ selectedRoom.description || 'Ruangan perkuliahan dan laboratorium praktikum terintegrasi program studi Teknologi Informasi. Dilengkapi pendingin ruangan (AC), proyektor multimedia, papan tulis, serta jaringan internet berkecepatan tinggi.' }}
               </p>
+            </div>
+
+            <!-- Facilities Grid (Dynamic) -->
+            <div>
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Fasilitas & Kelengkapan</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div 
+                  v-for="facility in getFacilities(selectedRoom.category)" 
+                  :key="facility"
+                  class="flex items-center gap-2.5 p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-semibold text-slate-700"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {{ facility }}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -236,6 +288,51 @@ const props = defineProps({
 
 const page = usePage()
 const userRole = computed(() => page.props.auth?.user?.role || 'guest')
+
+// Filter & Search State
+const searchQuery = ref('')
+const selectedCategory = ref('semua')
+
+// Real-time Search & Filter logic
+const filteredRooms = computed(() => {
+  return props.rooms.filter(room => {
+    const matchesSearch = room.room_name.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
+                          room.room_code.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchesCategory = selectedCategory.value === 'semua' || room.category === selectedCategory.value;
+    return matchesSearch && matchesCategory;
+  });
+});
+
+// Dynamic Facilities generator based on category
+const getFacilities = (category) => {
+  const common = [
+    'Air Conditioner (AC)',
+    'Koneksi Wi-Fi Cepat',
+  ];
+
+  if (category === 'kelas') {
+    return [
+      ...common,
+      'Proyektor Multimedia & Layar',
+      'Papan Tulis Whiteboard & Spidol',
+    ];
+  } else if (category === 'laboratorium') {
+    return [
+      ...common,
+      '30 Unit PC Client Spesifikasi Tinggi',
+      'Jaringan LAN Gigabit & Switch',
+      'Proyektor Layar Lebar',
+    ];
+  } else if (category === 'aula') {
+    return [
+      ...common,
+      'Sound System & Mic Wireless',
+      'Panggung, Podium & Mimbar',
+      'Kursi Lipat Tambahan (Hingga 100 unit)',
+    ];
+  }
+  return common;
+}
 
 // Detail Modal State
 const detailModalOpen = ref(false)
