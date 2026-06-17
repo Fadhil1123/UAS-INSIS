@@ -19,22 +19,22 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        if(Auth::attempt($credentials))
+        if (Auth::attempt($credentials))
         {
             $request->session()->regenerate();
 
             $user = Auth::user();
 
-            if($user->role == 'admin')
+            if ($user && $user->isAdmin())
             {
-                return redirect('/admin/dashboard');
+                return redirect()->route('admin.dashboard');
             }
 
-            return redirect('/dashboard');
+            return redirect()->route('dashboard');
         }
 
         return back()->withErrors([
-            'email' => 'Nomor induk atau password salah'
+            'nomor_induk' => 'Nomor induk atau password salah'
         ]);
     }
 
