@@ -88,4 +88,14 @@ Route::middleware('auth')->group(function () {
         '/bookings',
         [BookingController::class, 'store']
     )->name('bookings.store');
+
+    Route::get(
+        '/bookings',
+        [BookingManagementController::class, 'history']
+    )->name('bookings.history');
+
+    Route::patch(
+        '/bookings/{id}/cancel',
+        [BookingManagementController::class, 'cancel']
+    )->name('bookings.cancel');
 });
