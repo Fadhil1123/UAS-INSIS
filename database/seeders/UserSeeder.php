@@ -12,6 +12,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Administrator',
             'nomor_induk' => 'ADMIN001',
+            'phone_number' => '081347399899',
             'password' => '12345678',
             'role' => 'admin',
         ]);
@@ -19,6 +20,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Dosen Demo',
             'nomor_induk' => '198709102020121001',
+            'phone_number' => '081277890020',
             'password' => '12345678',
             'role' => 'dosen',
         ]);
@@ -26,6 +28,7 @@ class UserSeeder extends Seeder
         User::create([
             'name' => 'Mahasiswa Demo',
             'nomor_induk' => '2310817210001',
+            'phone_number' => '081234567890',
             'password' => '12345678',
             'role' => 'mahasiswa',
         ]);

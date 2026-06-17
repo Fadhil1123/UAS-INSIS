@@ -7,19 +7,27 @@ use Inertia\Inertia;
 use App\Models\Booking;
 use App\Models\ScheduleCache;
 use Illuminate\Http\Request;
+use App\Services\WhatsAppService;
+use Illuminate\Support\Facades\Log;
 
 class BookingController extends Controller
 {
     public function create()
     {
-        $rooms = Room::where('is_active', true)->get();
+        $rooms = Room::where(
+            'is_active',
+            true
+        )->get();
 
         return Inertia::render('Booking/Create', [
             'rooms' => $rooms
         ]);
     }
 
-    public function store(Request $request)
+    public function store(
+        Request $request,
+        WhatsAppService $waService
+    )
     {
         $validated = $request->validate(
             [
@@ -45,6 +53,9 @@ class BookingController extends Controller
                 'room_id.required' =>
                     'Ruangan wajib dipilih.',
 
+                'room_id.exists' =>
+                    'Ruangan tidak ditemukan.',
+
                 'booking_type.required' =>
                     'Jenis peminjaman wajib dipilih.',
 
@@ -66,7 +77,7 @@ class BookingController extends Controller
         );
 
         $room = Room::findOrFail(
-            $request->room_id
+            $validated['room_id']
         );
 
         /*
@@ -77,11 +88,11 @@ class BookingController extends Controller
 
         $bookingConflict = Booking::where(
                 'room_id',
-                $request->room_id
+                $validated['room_id']
             )
             ->where(
                 'booking_date',
-                $request->booking_date
+                $validated['booking_date']
             )
             ->whereIn(
                 'status',
@@ -93,12 +104,12 @@ class BookingController extends Controller
             ->where(
                 'start_time',
                 '<',
-                $request->end_time
+                $validated['end_time']
             )
             ->where(
                 'end_time',
                 '>',
-                $request->start_time
+                $validated['start_time']
             )
             ->exists();
 
@@ -124,17 +135,17 @@ class BookingController extends Controller
             )
             ->where(
                 'schedule_date',
-                $request->booking_date
+                $validated['booking_date']
             )
             ->where(
                 'start_time',
                 '<',
-                $request->end_time
+                $validated['end_time']
             )
             ->where(
                 'end_time',
                 '>',
-                $request->start_time
+                $validated['start_time']
             )
             ->exists();
 
@@ -154,32 +165,73 @@ class BookingController extends Controller
         =================================
         */
 
-        Booking::create([
+        $booking = Booking::create([
 
             'user_id' =>
                 auth()->id(),
 
             'room_id' =>
-                $request->room_id,
+                $validated['room_id'],
 
             'booking_type' =>
-                $request->booking_type,
+                $validated['booking_type'],
 
             'booking_date' =>
-                $request->booking_date,
+                $validated['booking_date'],
 
             'start_time' =>
-                $request->start_time,
+                $validated['start_time'],
 
             'end_time' =>
-                $request->end_time,
+                $validated['end_time'],
 
             'purpose' =>
-                $request->purpose,
+                $validated['purpose'],
 
             'status' =>
                 'pending'
         ]);
+
+        /*
+        =================================
+        KIRIM WHATSAPP KE ADMIN
+        =================================
+        */
+
+        try {
+
+            $pesanAdmin =
+                "📢 PENGAJUAN PEMINJAMAN RUANGAN BARU\n\n" .
+                "Nama: " . auth()->user()->name . "\n" .
+                "Nomor Induk: " . auth()->user()->nomor_induk . "\n\n" .
+                "Ruangan: " . $room->room_name . "\n" .
+                "Kode Ruangan: " . $room->room_code . "\n" .
+                "Jenis: " . $validated['booking_type'] . "\n\n" .
+                "Tanggal: " . $validated['booking_date'] . "\n" .
+                "Jam: " . $validated['start_time'] .
+                " - " . $validated['end_time'] . "\n\n" .
+                "Keperluan:\n" .
+                $validated['purpose'];
+
+            $adminPhone = config('services.whatsapp.admin_number');
+
+            if (!empty($adminPhone)) {
+
+                $waService->sendMessage(
+                    $adminPhone,
+                    $pesanAdmin
+                );
+            } else {
+                Log::warning('ADMIN_PHONE_NUMBER belum dikonfigurasi, notifikasi booking ke admin dilewati.');
+            }
+
+        } catch (\Exception $e) {
+
+            Log::error(
+                'Gagal kirim WA ke admin: ' .
+                $e->getMessage()
+            );
+        }
 
         return redirect('/dashboard')
             ->with(

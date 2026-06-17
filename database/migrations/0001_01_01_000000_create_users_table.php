@@ -19,6 +19,8 @@ return new class extends Migration
 
             $table->string('nomor_induk')->unique();
 
+            $table->string('phone_number')->nullable();
+
             $table->string('email')->nullable();
 
             $table->enum('role', [
