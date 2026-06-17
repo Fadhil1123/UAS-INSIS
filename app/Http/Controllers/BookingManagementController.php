@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Services\WhatsAppService;
+use Inertia\Inertia;
 
 class BookingManagementController extends Controller
 {
@@ -15,9 +16,26 @@ class BookingManagementController extends Controller
         $bookings = Booking::with('room')
             ->where('user_id', auth()->id())
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'id'               => $booking->id,
+                    'room_name'        => $booking->room->room_name ?? '-',
+                    'room_code'        => $booking->room->room_code ?? '-',
+                    'booking_type'     => $booking->booking_type,
+                    'booking_date'     => $booking->booking_date,
+                    'start_time'       => $booking->start_time,
+                    'end_time'         => $booking->end_time,
+                    'purpose'          => $booking->purpose,
+                    'status'           => $booking->status,
+                    'rejection_reason' => $booking->rejection_reason,
+                    'created_at'       => $booking->created_at->format('d M Y'),
+                ];
+            });
 
-        return view('user.booking.history', compact('bookings'));
+        return Inertia::render('Booking/History', [
+            'bookings' => $bookings
+        ]);
     }
 
     // 2. TAMPILKAN DETAIL BOOKING
@@ -44,7 +62,7 @@ class BookingManagementController extends Controller
             'status' => 'cancelled'
         ]);
 
-        return redirect()->route('booking.history')->with('success', 'Booking berhasil dibatalkan.');
+        return redirect()->route('bookings.history')->with('success', 'Booking berhasil dibatalkan.');
     }
 
     // 4. TAMPILKAN DAFTAR PENGAJUAN MASUK DI HALAMAN ADMIN

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Room;
+use Inertia\Inertia;
 use App\Models\Booking;
 use App\Models\ScheduleCache;
 use Illuminate\Http\Request;
@@ -11,15 +12,11 @@ class BookingController extends Controller
 {
     public function create()
     {
-        $rooms = Room::where(
-            'is_active',
-            true
-        )->get();
+        $rooms = Room::where('is_active', true)->get();
 
-        return view(
-            'bookings.create',
-            compact('rooms')
-        );
+        return Inertia::render('Booking/Create', [
+            'rooms' => $rooms
+        ]);
     }
 
     public function store(Request $request)
