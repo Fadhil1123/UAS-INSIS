@@ -72,9 +72,28 @@ class BookingManagementController extends Controller
         $bookings = Booking::with(['user', 'room'])
             ->where('status', 'pending')
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'id'               => $booking->id,
+                    'user_name'        => $booking->user->name ?? 'Unknown',
+                    'user_nomor_induk' => $booking->user->nomor_induk ?? '-',
+                    'user_phone'       => $booking->user->phone ?? '-',
+                    'room_name'        => $booking->room->room_name ?? '-',
+                    'room_code'        => $booking->room->room_code ?? '-',
+                    'booking_type'     => $booking->booking_type,
+                    'booking_date'     => $booking->booking_date,
+                    'start_time'       => $booking->start_time,
+                    'end_time'         => $booking->end_time,
+                    'purpose'          => $booking->purpose,
+                    'status'           => $booking->status,
+                    'created_at'       => $booking->created_at->format('d M Y, H:i'),
+                ];
+            });
 
-        return view('admin.bookings.index', compact('bookings'));
+        return Inertia::render('Admin/Bookings/Index', [
+            'bookings' => $bookings
+        ]);
     }
 
     // 5. ADMIN MENYETUJUI BOOKING (Approve)
