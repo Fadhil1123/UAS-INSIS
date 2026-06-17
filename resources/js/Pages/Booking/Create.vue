@@ -50,6 +50,26 @@
               </p>
             </div>
 
+            <!-- Nomor WhatsApp (Aktif) -->
+            <div>
+              <label for="phone_number" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                Nomor WhatsApp (Aktif) <span class="text-rose-500">*</span>
+              </label>
+              <input
+                id="phone_number"
+                type="text"
+                v-model="form.phone_number"
+                placeholder="Contoh: 081234567890"
+                class="w-full bg-slate-50 border border-slate-200 text-slate-800 font-semibold py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                :class="{ 'border-rose-400 bg-rose-50': form.errors.phone_number }"
+              />
+              <p class="mt-1 text-[11px] text-slate-400 font-medium">Notifikasi status peminjaman akan otomatis dikirimkan ke nomor WhatsApp ini.</p>
+              <p v-if="form.errors.phone_number" class="mt-1.5 text-xs font-semibold text-rose-600 flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                {{ form.errors.phone_number }}
+              </p>
+            </div>
+
             <!-- Jenis Peminjaman -->
             <div>
               <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
@@ -265,7 +285,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { Link, useForm } from '@inertiajs/vue3'
+import { Link, useForm, usePage } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 
 const props = defineProps({
@@ -275,6 +295,8 @@ const props = defineProps({
   }
 })
 
+const page = usePage()
+
 const form = useForm({
   room_id: '',
   booking_type: '',
@@ -282,6 +304,7 @@ const form = useForm({
   start_time: '',
   end_time: '',
   purpose: '',
+  phone_number: page.props.auth?.user?.phone_number || '',
 })
 
 const bookingTypes = [
