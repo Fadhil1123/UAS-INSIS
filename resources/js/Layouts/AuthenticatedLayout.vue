@@ -305,8 +305,11 @@ const adminItems = [
 
 const isCurrentUrl = (href) => {
   const url = page.url
-  if (href === '/dashboard' || href === '/admin/dashboard') {
-    return url === '/dashboard' || url === '/admin/dashboard'
+  if (href === '/admin/dashboard') {
+    return url === '/admin/dashboard'
+  }
+  if (href === '/dashboard') {
+    return url === '/dashboard'
   }
   return url.startsWith(href)
 }
