@@ -160,8 +160,18 @@
 </template>
 
 <script setup>
-import { Link } from '@inertiajs/vue3'
+import { onMounted } from 'vue'
+import { Link, usePage, router } from '@inertiajs/vue3'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+
+const page = usePage()
+
+// Guard: jika admin mengakses halaman ini, redirect ke admin dashboard
+onMounted(() => {
+  if (page.props.auth?.user?.role === 'admin') {
+    router.visit('/admin/dashboard', { replace: true })
+  }
+})
 
 // Define props with defaults for robustness
 const props = defineProps({
