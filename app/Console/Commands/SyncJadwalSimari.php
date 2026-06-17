@@ -15,14 +15,32 @@ class SyncJadwalSimari extends Command
 
     public function handle(SimariService $simariService)
     {
-        $this->info('Memulai sinkronisasi jadwal dari API SIMARI...');
+        $this->info('Memulai sinkronisasi dengan API SIMARI...');
 
-        $success = $simariService->fetchAndCacheJadwal();
-
-        if ($success) {
-            $this->info('Sinkronisasi BERHASIL! Data cache telah diperbarui.');
+        // 1. SINKRONISASI JADWAL
+        $this->info('--> Menarik data Jadwal Kuliah...');
+        $jadwalSuccess = $simariService->fetchAndCacheJadwal();
+        
+        if ($jadwalSuccess) {
+            $this->info('    ✅ Jadwal berhasil disinkronisasi.');
         } else {
-            $this->error('Sinkronisasi GAGAL! Silakan periksa file log (storage/logs/laravel.log) untuk detail error.');
+            $this->error('    ❌ Gagal sinkronisasi jadwal.');
+        }
+
+        // 2. SINKRONISASI RUANGAN
+        $this->info('--> Menarik data Ruangan...');
+        $ruanganSuccess = $simariService->syncRooms();
+        
+        if ($ruanganSuccess) {
+            $this->info('    ✅ Ruangan berhasil disinkronisasi.');
+        } else {
+            $this->error('    ❌ Gagal sinkronisasi ruangan.');
+        }
+
+        if ($jadwalSuccess && $ruanganSuccess) {
+            $this->info('🎉 Semua proses sinkronisasi BERHASIL diselesaikan!');
+        } else {
+            $this->warn('⚠️ Proses selesai, namun ada beberapa bagian yang gagal. Cek storage/logs/laravel.log untuk detailnya.');
         }
     }
 }
