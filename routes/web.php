@@ -24,6 +24,45 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get(
+        '/dashboard',
+        [DashboardController::class, 'index']
+    )->name('dashboard');
+
+    Route::get(
+        '/rooms',
+        [RoomController::class, 'index']
+    )->name('rooms.index');
+
+    Route::get(
+        '/calendar',
+        [CalendarController::class, 'index']
+    )->name('calendar.index');
+
+    Route::get(
+        '/calendar/events',
+        [CalendarController::class, 'getEvents']
+    )->name('calendar.events');
+
+    Route::get(
+        '/bookings',
+        [BookingManagementController::class, 'history']
+    )->name('bookings.history');
+
+    Route::get(
+        '/bookings/create',
+        [BookingController::class, 'create']
+    )->name('bookings.create');
+
+    Route::post(
+        '/bookings',
+        [BookingController::class, 'store']
+    )->name('bookings.store');
+
+    Route::get(
+        '/bookings/template-surat',
+        [BookingController::class, 'downloadTemplate']
+    )->name('bookings.template');
     Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
     Route::get('/calendar/events', [CalendarController::class, 'getEvents'])->name('calendar.events');
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
@@ -35,6 +74,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/bookings', [BookingManagementController::class, 'adminIndex'])->name('admin.bookings.index');
     Route::patch('/admin/bookings/{id}/approve', [BookingManagementController::class, 'approve'])->name('admin.bookings.approve');
     Route::patch('/admin/bookings/{id}/reject', [BookingManagementController::class, 'reject'])->name('admin.bookings.reject');
+    Route::resource(
+        'admin/rooms',
+        RoomController::class
+    );
 
     Route::resource('admin/rooms', RoomController::class);
 });
