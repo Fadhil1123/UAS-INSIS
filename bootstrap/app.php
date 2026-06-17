@@ -11,23 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function ($middleware) {
-<<<<<<< Updated upstream
-=======
-
-        $middleware->redirectUsersTo(function ($request) {
-            $user = $request->user();
-
-            if ($user && strtolower(trim((string) $user->role)) === 'admin') {
-                return route('admin.dashboard');
-            }
-
-            return route('dashboard');
-        });
-
->>>>>>> Stashed changes
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
