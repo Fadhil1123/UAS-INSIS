@@ -2,7 +2,7 @@
   <AuthenticatedLayout>
     <!-- Welcome Header -->
     <div class="mb-8">
-      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard Mahasiswa & Dosen</h1>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard {{ page.props.auth?.user?.role === 'dosen' ? 'Dosen' : 'Mahasiswa' }}</h1>
       <p class="text-slate-500 text-sm mt-1">Sistem Peminjaman Ruangan Terintegrasi Universitas Lambung Mangkurat.</p>
     </div>
 

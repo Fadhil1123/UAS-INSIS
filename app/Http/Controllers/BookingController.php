@@ -47,7 +47,10 @@ class BookingController extends Controller
                     'required|after:start_time',
 
                 'purpose' =>
-                    'required|string'
+                    'required|string',
+
+                'phone_number' =>
+                    'required|string|min:10|max:15'
             ],
             [
                 'room_id.required' =>
@@ -72,9 +75,25 @@ class BookingController extends Controller
                     'Jam selesai harus lebih besar dari jam mulai.',
 
                 'purpose.required' =>
-                    'Keperluan wajib diisi.'
+                    'Keperluan wajib diisi.',
+
+                'phone_number.required' =>
+                    'Nomor WhatsApp wajib diisi.',
+
+                'phone_number.min' =>
+                    'Nomor WhatsApp minimal 10 karakter.',
+
+                'phone_number.max' =>
+                    'Nomor WhatsApp maksimal 15 karakter.'
             ]
         );
+
+        // Update user's phone number
+        $user = auth()->user();
+        if ($user && $user->phone_number !== $validated['phone_number']) {
+            $user->phone_number = $validated['phone_number'];
+            $user->save();
+        }
 
         $room = Room::findOrFail(
             $validated['room_id']
