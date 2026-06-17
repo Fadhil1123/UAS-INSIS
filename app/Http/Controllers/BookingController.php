@@ -8,6 +8,7 @@ use App\Models\ScheduleCache;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
+
 {
     public function create()
     {
@@ -32,6 +33,9 @@ class BookingController extends Controller
                 'booking_type' =>
                     'required|in:perkuliahan,organisasi',
 
+                'surat_file' =>
+                    'required_if:booking_type,organisasi|file|mimes:pdf|max:2048',
+
                 'booking_date' =>
                     'required|date',
 
@@ -50,6 +54,15 @@ class BookingController extends Controller
 
                 'booking_type.required' =>
                     'Jenis peminjaman wajib dipilih.',
+
+                'surat_file.required_if' =>
+                    'Surat peminjaman wajib diupload untuk kegiatan organisasi.',
+
+                'surat_file.mimes' =>
+                    'File harus berformat PDF.',
+
+                'surat_file.max' =>
+                    'Ukuran file maksimal 2 MB.',
 
                 'booking_date.required' =>
                     'Tanggal wajib diisi.',
@@ -157,6 +170,22 @@ class BookingController extends Controller
         =================================
         */
 
+        $suratPath = null;
+        $suratOriginalName = null;
+
+        if ($request->hasFile('surat_file')) {
+
+            $file = $request->file('surat_file');
+
+            $suratPath = $file->store(
+                'surat-peminjaman',
+                'public'
+            );
+
+            $suratOriginalName =
+                $file->getClientOriginalName();
+        }
+
         Booking::create([
 
             'user_id' =>
@@ -167,6 +196,12 @@ class BookingController extends Controller
 
             'booking_type' =>
                 $request->booking_type,
+
+            'surat_file' =>
+                $suratPath,
+
+            'surat_original_name' =>
+                $suratOriginalName,
 
             'booking_date' =>
                 $request->booking_date,
@@ -189,5 +224,25 @@ class BookingController extends Controller
                 'success',
                 'Pengajuan booking berhasil dikirim.'
             );
+    }
+
+    public function downloadTemplate()
+    {
+        $path = storage_path(
+            'app/public/templates/template-surat-organisasi.pdf'
+        );
+
+        if (!file_exists($path)) {
+
+            abort(
+                404,
+                'Template surat tidak ditemukan.'
+            );
+        }
+
+        return response()->download(
+            $path,
+            'Template-Surat-Peminjaman-Ruangan.pdf'
+        );
     }
 }

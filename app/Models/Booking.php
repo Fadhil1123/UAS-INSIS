@@ -11,6 +11,8 @@ class Booking extends Model
         'room_id',
         'booking_type',
         'booking_date',
+        'surat_file',
+        'surat_original_name',
         'start_time',
         'end_time',
         'purpose',

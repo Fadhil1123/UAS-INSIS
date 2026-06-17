@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\BookingManagementController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CalendarController;
 
 Route::middleware('guest')->group(function () {
 
@@ -31,6 +32,41 @@ Route::middleware('auth')->group(function () {
         '/dashboard',
         [DashboardController::class, 'index']
     )->name('dashboard');
+
+    Route::get(
+        '/rooms',
+        [RoomController::class, 'index']
+    )->name('rooms.index');
+
+    Route::get(
+        '/calendar',
+        [CalendarController::class, 'index']
+    )->name('calendar.index');
+
+    Route::get(
+        '/calendar/events',
+        [CalendarController::class, 'getEvents']
+    )->name('calendar.events');
+
+    Route::get(
+        '/bookings',
+        [BookingManagementController::class, 'history']
+    )->name('bookings.history');
+
+    Route::get(
+        '/bookings/create',
+        [BookingController::class, 'create']
+    )->name('bookings.create');
+
+    Route::post(
+        '/bookings',
+        [BookingController::class, 'store']
+    )->name('bookings.store');
+
+    Route::get(
+        '/bookings/template-surat',
+        [BookingController::class, 'downloadTemplate']
+    )->name('bookings.template');
 });
 
 Route::middleware([
@@ -50,27 +86,4 @@ Route::middleware([
         'admin/rooms',
         RoomController::class
     );
-});
-
-Route::middleware('auth')->group(function () {
-
-    Route::post(
-        '/logout',
-        [AuthController::class, 'logout']
-    );
-
-    Route::get(
-        '/dashboard',
-        [DashboardController::class, 'index']
-    )->name('dashboard');
-
-    Route::get(
-        '/bookings/create',
-        [BookingController::class, 'create']
-    )->name('bookings.create');
-
-    Route::post(
-        '/bookings',
-        [BookingController::class, 'store']
-    )->name('bookings.store');
 });
