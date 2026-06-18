@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Booking; // <-- Import Model Booking
-use Illuminate\Support\Facades\Storage;
 use App\Models\Booking;
+use Illuminate\Support\Facades\Storage;
 use App\Services\WhatsAppService;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -22,20 +21,6 @@ class BookingManagementController extends Controller
             ->get()
             ->map(function ($booking) {
                 return [
-                    'id' => $booking->id,
-                    'room_name' => $booking->room ? $booking->room->room_name : '-',
-                    'room_code' => $booking->room ? $booking->room->room_code : '-',
-                    'booking_type' => $booking->booking_type,
-                    'booking_date' => $booking->booking_date,
-                    'start_time' => $booking->start_time,
-                    'end_time' => $booking->end_time,
-                    'purpose' => $booking->purpose,
-                    'status' => $booking->status,
-                ];
-            });
-
-        return Inertia::render('Bookings/History', [
-            'bookings' => $bookings,
                     'id'               => $booking->id,
                     'room_name'        => $booking->room->room_name ?? '-',
                     'room_code'        => $booking->room->room_code ?? '-',

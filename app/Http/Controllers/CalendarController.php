@@ -5,11 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Room;
 use App\Models\ScheduleCache;
 use Illuminate\Http\Request;
-use Illuminate\Http\Request;
 use App\Models\Booking;
-use App\Models\ScheduleCache;
-use App\Models\Room;
-
 use Inertia\Inertia;
 
 class CalendarController extends Controller
@@ -75,29 +71,11 @@ class CalendarController extends Controller
             ] : null,
             'schedules' => $schedules,
             'selectedRoomCode' => $roomCode,
-    public function index()
-    {
-        $rooms = Room::select('id', 'room_name', 'room_code')->get();
-        return Inertia::render('Calendar/Index', [
-            'rooms' => $rooms
         ]);
     }
 
     public function getEvents(Request $request)
     {
-        $roomCode = $request->query('room_id');
-
-        $query = ScheduleCache::query();
-
-        if ($roomCode) {
-            $query->where('room_code', $roomCode);
-        }
-
-        return response()->json(
-            $query->orderBy('schedule_date')
-                ->orderBy('start_time')
-                ->get()
-        );
         // Tangkap parameter filter ruangan dari Frontend (jika ada)
         $roomId = $request->input('room_id');
         

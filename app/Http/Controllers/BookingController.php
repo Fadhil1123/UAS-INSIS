@@ -39,7 +39,7 @@ class BookingController extends Controller
                     'required|in:perkuliahan,organisasi',
 
                 'surat_file' =>
-                    'required_if:booking_type,organisasi|file|mimes:pdf|max:2048',
+                    'required_if:booking_type,organisasi|nullable|file|mimes:pdf|max:2048',
 
                 'booking_date' =>
                     'required|date',
@@ -213,7 +213,6 @@ class BookingController extends Controller
                 $file->getClientOriginalName();
         }
 
-        Booking::create([
         $booking = Booking::create([
 
             'user_id' =>
@@ -298,7 +297,7 @@ class BookingController extends Controller
     public function downloadTemplate()
     {
         $path = storage_path(
-            'app/public/templates/template-surat-organisasi.pdf'
+            'app/public/template-surat.docx'
         );
 
         if (!file_exists($path)) {
@@ -311,8 +310,7 @@ class BookingController extends Controller
 
         return response()->download(
             $path,
-            'Template-Surat-Peminjaman-Ruangan.pdf'
+            'Template-Surat-Peminjaman-Ruangan.docx'
         );
     }
-}
 }
