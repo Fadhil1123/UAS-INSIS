@@ -2,7 +2,7 @@
 
 <form
     method="POST"
-    action="{{ route('rooms.update', $room->id) }}"
+    action="{{ route('admin.rooms.update', $room->id) }}"
 >
     @csrf
     @method('PUT')

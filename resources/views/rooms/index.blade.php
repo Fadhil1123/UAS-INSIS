@@ -1,6 +1,6 @@
 <h1>Daftar Ruangan</h1>
 
-<a href="{{ route('rooms.create') }}">
+<a href="{{ route('admin.rooms.create') }}">
     Tambah Ruangan
 </a>
 
@@ -26,13 +26,13 @@
 
         <td>
 
-            <a href="{{ route('rooms.edit', $room->id) }}">
+            <a href="{{ route('admin.rooms.edit', $room->id) }}">
                 Edit
             </a>
 
             <form
                 method="POST"
-                action="{{ route('rooms.destroy', $room->id) }}"
+                action="{{ route('admin.rooms.destroy', $room->id) }}"
             >
                 @csrf
                 @method('DELETE')

@@ -1,7 +1,11 @@
 <template>
-  <div class="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
+  <div class="min-h-screen text-slate-800 flex flex-col font-sans relative">
+    <!-- Animated Background -->
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+      <BubblesBg class="!h-full !w-full" />
+    </div>
     <!-- Top Navbar -->
-    <header class="bg-white border-b border-slate-200/80 sticky top-0 z-40 backdrop-blur-md bg-white/95">
+    <header class="border-b border-white/20 sticky top-0 z-40 backdrop-blur-md bg-white/70">
       <div class="px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <!-- Brand & Hamburger -->
         <div class="flex items-center gap-4">
@@ -99,7 +103,7 @@
       <!-- Sidebar -->
       <aside 
         :class="[
-          'fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200/80 pt-20 lg:pt-0 z-30 transform lg:transform-none lg:static transition-transform duration-300 ease-in-out flex flex-col',
+          'fixed inset-y-0 left-0 w-64 backdrop-blur-md bg-white/80 border-r border-white/30 pt-20 lg:pt-0 z-30 transform lg:transform-none lg:static transition-transform duration-300 ease-in-out flex flex-col',
           sidebarOpen ? 'translate-x-0' : '-translate-x-0 lg:translate-x-0'
         ]"
       >
@@ -158,7 +162,7 @@
         </nav>
 
         <!-- Sidebar User Card Footer -->
-        <div class="p-4 border-t border-slate-100 bg-slate-50/50">
+        <div class="p-4 border-t border-white/30 bg-white/30">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-600 font-bold text-sm">
               {{ userInitials }}
@@ -231,7 +235,7 @@
         </div>
 
         <!-- Page Footer -->
-        <footer class="bg-white border-t border-slate-200/80 py-4 px-6 text-center text-xs text-slate-400 font-medium">
+        <footer class="backdrop-blur-md bg-white/70 border-t border-white/20 py-4 px-6 text-center text-xs text-slate-500 font-medium">
           &copy; {{ new Date().getFullYear() }} Program Studi Teknologi Informasi - Universitas Lambung Mangkurat. All rights reserved.
         </footer>
       </main>
@@ -242,6 +246,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
+import BubblesBg from '@/components/ui/bg-bubbles/BubblesBg.vue'
 
 // Icons Components (inline svg functions)
 import DashboardIcon from '@/Components/Icons/DashboardIcon.vue'

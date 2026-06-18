@@ -62,6 +62,55 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function dosen()
+    {
+        $user = Auth::user();
+
+        $stats = [
+            'my_bookings_count'      => Booking::where('user_id', $user->id)->count(),
+            'approved_bookings_count'=> Booking::where('user_id', $user->id)->where('status', 'approved')->count(),
+            'pending_bookings_count' => Booking::where('user_id', $user->id)->where('status', 'pending')->count(),
+        ];
+
+        $upcomingBookings = Booking::with('room')
+            ->where('user_id', $user->id)
+            ->where('booking_date', '>=', now()->toDateString())
+            ->orderBy('booking_date')
+            ->orderBy('start_time')
+            ->get()
+            ->map(function ($booking) {
+                return [
+                    'id'           => $booking->id,
+                    'room_name'    => $booking->room ? $booking->room->room_name : '-',
+                    'room_id'      => $booking->room ? $booking->room->room_code : '-',
+                    'booking_date' => $booking->booking_date,
+                    'start_time'   => $booking->start_time,
+                    'end_time'     => $booking->end_time,
+                    'status'       => $booking->status,
+                ];
+            });
+
+        $featuredRooms = Room::where('is_active', true)
+            ->take(3)
+            ->get()
+            ->map(function ($room) {
+                return [
+                    'id'         => $room->id,
+                    'room_code'  => $room->room_code,
+                    'room_name'  => $room->room_name,
+                    'category'   => $room->category,
+                    'capacity'   => $room->capacity,
+                    'photo_path' => $room->photo,
+                ];
+            });
+
+        return Inertia::render('Dosen/Dashboard', [
+            'stats'           => $stats,
+            'upcomingBookings'=> $upcomingBookings,
+            'featuredRooms'   => $featuredRooms,
+        ]);
+    }
+
     public function admin()
     {
         $stats = [
