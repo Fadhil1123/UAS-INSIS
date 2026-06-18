@@ -116,4 +116,55 @@ class SimariService
             return false;
         }
     }
+
+    /**
+     * API terbaru mengembalikan data jadwal per kategori: { kelas: [...], lab: [...] }.
+     * Format lama: array datar langsung di key data.
+     */
+    private function extractJadwalItems(mixed $data): ?array
+    {
+        if (! is_array($data)) {
+            return null;
+        }
+
+        if (isset($data['kelas']) || isset($data['lab'])) {
+            $items = array_merge($data['kelas'] ?? [], $data['lab'] ?? []);
+
+            return empty($items) ? null : $items;
+        }
+
+        if (array_is_list($data)) {
+            return empty($data) ? null : $data;
+        }
+
+        return null;
+    }
+
+    /**
+     * API terbaru mengembalikan daftar ruangan per kategori: { kelas: [...], lab: [...] }.
+     * Format lama: array datar kode ruangan di key data.
+     */
+    private function extractRoomGroups(mixed $data): ?array
+    {
+        if (! is_array($data)) {
+            return null;
+        }
+
+        if (isset($data['kelas']) || isset($data['lab'])) {
+            $groups = [
+                ['codes' => $data['kelas'] ?? [], 'category' => 'kelas'],
+                ['codes' => $data['lab'] ?? [], 'category' => 'laboratorium'],
+            ];
+
+            $hasRooms = collect($groups)->contains(fn (array $group) => ! empty($group['codes']));
+
+            return $hasRooms ? $groups : null;
+        }
+
+        if (array_is_list($data) && ! empty($data)) {
+            return [['codes' => $data, 'category' => 'kelas']];
+        }
+
+        return null;
+    }
 }
