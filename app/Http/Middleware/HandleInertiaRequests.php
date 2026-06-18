@@ -46,6 +46,10 @@ class HandleInertiaRequests extends Middleware
                     'phone_number' => $request->user()->phone_number,
                 ] : null,
             ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+                'error' => $request->session()->get('error'),
+            ],
         ];
     }
 }

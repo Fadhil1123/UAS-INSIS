@@ -20,16 +20,34 @@ class BookingController extends Controller
 
     public function store(Request $request, WhatsAppService $waService)
     {
-        $validated = $request->validate([
-            'room_id'      => 'required|exists:rooms,id',
-            'booking_type' => 'required|in:perkuliahan,organisasi',
-            'surat_file'   => 'required_if:booking_type,organisasi|file|mimes:pdf|max:2048',
-            'booking_date' => 'required|date',
-            'start_time'   => 'required',
-            'end_time'     => 'required|after:start_time',
-            'purpose'      => 'required|string',
-            'phone_number' => 'required|string|min:10|max:15'
-        ]);
+        $validated = $request->validate(
+            [
+                'room_id'      => 'required|exists:rooms,id',
+                'booking_type' => 'required|in:perkuliahan,organisasi',
+                'surat_file'   => 'required_if:booking_type,organisasi|nullable|file|mimes:pdf|max:2048',
+                'booking_date' => 'required|date',
+                'start_time'   => 'required',
+                'end_time'     => 'required|after:start_time',
+                'purpose'      => 'required|string',
+                'phone_number' => 'required|string|min:10|max:15'
+            ],
+            [
+                'room_id.required' => 'Ruangan wajib dipilih.',
+                'room_id.exists' => 'Ruangan tidak ditemukan.',
+                'booking_type.required' => 'Jenis peminjaman wajib dipilih.',
+                'surat_file.required_if' => 'Surat peminjaman wajib diupload untuk kegiatan organisasi.',
+                'surat_file.mimes' => 'File harus berformat PDF.',
+                'surat_file.max' => 'Ukuran file maksimal 2 MB.',
+                'booking_date.required' => 'Tanggal wajib diisi.',
+                'start_time.required' => 'Jam mulai wajib diisi.',
+                'end_time.required' => 'Jam selesai wajib diisi.',
+                'end_time.after' => 'Jam selesai harus lebih besar dari jam mulai.',
+                'purpose.required' => 'Keperluan wajib diisi.',
+                'phone_number.required' => 'Nomor WhatsApp wajib diisi.',
+                'phone_number.min' => 'Nomor WhatsApp minimal 10 karakter.',
+                'phone_number.max' => 'Nomor WhatsApp maksimal 15 karakter.'
+            ]
+        );
 
         $user = auth()->user();
         if ($user && $user->phone_number !== $validated['phone_number']) {
@@ -74,5 +92,16 @@ class BookingController extends Controller
         ]);
 
         return redirect('/dashboard')->with('success', 'Pengajuan booking berhasil dikirim.');
+    }
+
+    public function downloadTemplate()
+    {
+        $path = storage_path('app/public/template-surat.docx');
+
+        if (!file_exists($path)) {
+            abort(404, 'Template surat tidak ditemukan.');
+        }
+
+        return response()->download($path, 'Template-Surat-Peminjaman-Ruangan.docx');
     }
 }

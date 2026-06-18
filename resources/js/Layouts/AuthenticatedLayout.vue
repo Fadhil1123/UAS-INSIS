@@ -175,20 +175,39 @@
       <main class="flex-1 min-w-0 flex flex-col">
         <!-- Content Container -->
         <div class="flex-1 p-4 sm:p-6 lg:p-8">
-          <!-- Flash Messages (Inertia shared props alert) -->
-          <transition 
-            enter-active-class="transform ease-out duration-300 transition"
-            enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-            enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-            leave-active-class="transition ease-in duration-100"
-            leave-from-class="opacity-100"
-            leave-to-class="opacity-0"
+          <!-- Success Pop-up Modal -->
+          <transition
+            enter-active-class="transition duration-300 ease-out"
+            enter-from-class="opacity-0 scale-95"
+            enter-to-class="opacity-100 scale-100"
+            leave-active-class="transition duration-200 ease-in"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-95"
           >
-            <div v-if="$page.props.flash && $page.props.flash.success" class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl flex items-center gap-3 shadow-xs">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-sm font-medium">{{ $page.props.flash.success }}</span>
+            <div v-if="showSuccessAlert" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <!-- Backdrop -->
+              <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showSuccessAlert = false"></div>
+              
+              <!-- Modal Card -->
+              <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm relative z-10 overflow-hidden border border-emerald-100/50">
+                <!-- Header/Icon -->
+                <div class="p-8 pb-4 text-center">
+                  <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-4 animate-bounce">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 class="text-lg font-extrabold text-slate-900">Pengajuan Berhasil</h3>
+                  <p class="text-xs text-slate-500 font-semibold mt-1.5 leading-relaxed">{{ $page.props.flash?.success }}</p>
+                </div>
+                
+                <!-- Footer -->
+                <div class="p-6 text-center">
+                  <button @click="showSuccessAlert = false" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition-colors shadow-md shadow-emerald-600/15 cursor-pointer">
+                    Selesai & Tutup
+                  </button>
+                </div>
+              </div>
             </div>
           </transition>
 
@@ -221,7 +240,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Link, usePage, router } from '@inertiajs/vue3'
 
 // Icons Components (inline svg functions)
@@ -235,6 +254,20 @@ const page = usePage()
 
 const sidebarOpen = ref(false)
 const profileDropdownOpen = ref(false)
+
+const showSuccessAlert = ref(false)
+
+// Watch for flash success message
+watch(
+  () => page.props.flash?.success,
+  (val) => {
+    console.log('Flash success triggered:', val)
+    if (val) {
+      showSuccessAlert.value = true
+    }
+  },
+  { immediate: true }
+)
 
 const userName = computed(() => page.props.auth?.user?.name || 'Guest')
 const userRole = computed(() => page.props.auth?.user?.role || 'guest')
