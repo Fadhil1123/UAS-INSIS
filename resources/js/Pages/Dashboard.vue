@@ -182,7 +182,7 @@
           <div class="aspect-video bg-slate-100 relative overflow-hidden">
             <img 
               v-if="room.photo_path" 
-              :src="'/storage/' + room.photo_path" 
+              :src="'/' + room.photo_path" 
               :alt="room.room_name" 
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
