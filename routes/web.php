@@ -12,6 +12,21 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// TEMP DEBUG - hapus setelah selesai debug
+Route::get('/debug-auth', function () {
+    return response()->json([
+        'logged_in'    => auth()->check(),
+        'user'         => auth()->user() ? [
+            'id'         => auth()->user()->id,
+            'name'       => auth()->user()->name,
+            'role'       => auth()->user()->role,
+            'nomor_induk'=> auth()->user()->nomor_induk,
+        ] : null,
+        'session_id'   => session()->getId(),
+        'session_driver' => config('session.driver'),
+    ]);
+});
+
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -45,6 +60,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/bookings', [BookingManagementController::class, 'adminIndex'])->name('admin.bookings.index');
     Route::patch('/admin/bookings/{id}/approve', [BookingManagementController::class, 'approve'])->name('admin.bookings.approve');
     Route::patch('/admin/bookings/{id}/reject', [BookingManagementController::class, 'reject'])->name('admin.bookings.reject');
+
+    Route::patch('/admin/rooms/{room}/toggle-status', [RoomController::class, 'toggleStatus'])->name('admin.rooms.toggle-status');
 
     Route::resource('admin/rooms', RoomController::class)->names([
         'index'   => 'admin.rooms.index',
