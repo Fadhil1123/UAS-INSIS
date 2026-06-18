@@ -25,11 +25,13 @@ class SimariService
                 return false;
             }
 
-            // 3. PARSING JSON
-            $jadwalData = $response->json(); // Mengubah response teks menjadi array PHP
+            $responseData = $response->json();
 
-            if (!is_array($jadwalData)) {
-                Log::error("Format data dari API SIMARI bukan JSON Array yang valid.");
+            // Ambil array dari dalam key 'data' karena FastAPI membungkusnya di sana
+            $jadwalItems = $responseData['data'] ?? [];
+
+            if (!is_array($jadwalItems) || empty($jadwalItems)) {
+                Log::error("Format data Jadwal tidak valid atau kosong.");
                 return false;
             }
 
@@ -58,5 +60,56 @@ class SimariService
             Log::critical("Terjadi kegagalan koneksi sistem ke API SIMARI: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * API terbaru mengembalikan data jadwal per kategori: { kelas: [...], lab: [...] }.
+     * Format lama: array datar langsung di key data.
+     */
+    private function extractJadwalItems(mixed $data): ?array
+    {
+        if (! is_array($data)) {
+            return null;
+        }
+
+        if (isset($data['kelas']) || isset($data['lab'])) {
+            $items = array_merge($data['kelas'] ?? [], $data['lab'] ?? []);
+
+            return empty($items) ? null : $items;
+        }
+
+        if (array_is_list($data)) {
+            return empty($data) ? null : $data;
+        }
+
+        return null;
+    }
+
+    /**
+     * API terbaru mengembalikan daftar ruangan per kategori: { kelas: [...], lab: [...] }.
+     * Format lama: array datar kode ruangan di key data.
+     */
+    private function extractRoomGroups(mixed $data): ?array
+    {
+        if (! is_array($data)) {
+            return null;
+        }
+
+        if (isset($data['kelas']) || isset($data['lab'])) {
+            $groups = [
+                ['codes' => $data['kelas'] ?? [], 'category' => 'kelas'],
+                ['codes' => $data['lab'] ?? [], 'category' => 'laboratorium'],
+            ];
+
+            $hasRooms = collect($groups)->contains(fn (array $group) => ! empty($group['codes']));
+
+            return $hasRooms ? $groups : null;
+        }
+
+        if (array_is_list($data) && ! empty($data)) {
+            return [['codes' => $data, 'category' => 'kelas']];
+        }
+
+        return null;
     }
 }
