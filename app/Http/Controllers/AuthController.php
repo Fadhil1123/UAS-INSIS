@@ -31,6 +31,11 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard');
             }
 
+            if ($user && $user->isDosen())
+            {
+                return redirect()->route('dosen.dashboard');
+            }
+
             return redirect()->route('dashboard');
         }
 

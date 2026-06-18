@@ -27,7 +27,7 @@ class UserSeeder extends Seeder
 
         User::create([
             'name' => 'Mahasiswa Demo',
-            'nomor_induk' => '2310817210001',
+            'nomor_induk' => '231081721001',
             'phone_number' => '081234567890',
             'password' => '12345678',
             'role' => 'mahasiswa',

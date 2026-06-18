@@ -2,7 +2,7 @@
 
 <form
     method="POST"
-    action="{{ route('rooms.store') }}"
+    action="{{ route('admin.rooms.store') }}"
 >
     @csrf
 
