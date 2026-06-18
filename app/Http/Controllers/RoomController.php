@@ -30,7 +30,7 @@ class RoomController extends Controller
 
     public function create()
     {
-        return view('rooms.create');
+        return Inertia::render('Admin/Rooms/Create');
     }
 
     public function store(Request $request)
@@ -39,7 +39,7 @@ class RoomController extends Controller
         [
             'room_code' => 'required|unique:rooms',
             'room_name' => 'required',
-            'category' => 'required|in:kelas,laboratorium,aula',
+            'category' => 'required|in:kelas,laboratorium',
             'capacity' => 'required|integer|min:1',
         ],
         [
@@ -60,16 +60,15 @@ class RoomController extends Controller
         Room::create($validated);
 
         return redirect()
-            ->route('rooms.index')
+            ->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil ditambahkan');
     }
 
     public function edit(Room $room)
     {
-        return view(
-            'rooms.edit',
-            compact('room')
-        );
+        return Inertia::render('Admin/Rooms/Edit', [
+            'room' => $room,
+        ]);
     }
 
     public function update(
@@ -102,7 +101,7 @@ class RoomController extends Controller
         $room->update($validated);
 
         return redirect()
-            ->route('rooms.index')
+            ->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil diperbarui');
     }
 
@@ -111,7 +110,7 @@ class RoomController extends Controller
         $room->delete();
 
         return redirect()
-            ->route('rooms.index')
+            ->route('admin.rooms.index')
             ->with('success', 'Ruangan berhasil dihapus');
     }
 }
