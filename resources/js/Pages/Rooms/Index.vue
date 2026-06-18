@@ -24,7 +24,7 @@
       <!-- Category Filter Tabs -->
       <div class="flex flex-wrap gap-1.5 w-full md:w-auto">
         <button 
-          v-for="cat in ['semua', 'kelas', 'laboratorium', 'aula']" 
+          v-for="cat in ['semua', 'kelas', 'laboratorium',]" 
           :key="cat"
           @click="selectedCategory = cat"
           :class="[
