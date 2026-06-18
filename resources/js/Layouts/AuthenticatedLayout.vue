@@ -172,9 +172,9 @@
       </aside>
 
       <!-- Main Content Area -->
-      <main class="flex-1 min-w-0 flex flex-col">
+      <main class="flex-1 min-w-0 flex flex-col w-full max-w-full">
         <!-- Content Container -->
-        <div class="flex-1 p-4 sm:p-6 lg:p-8">
+        <div class="flex-1 p-4 sm:p-6 lg:p-8 w-full max-w-full min-w-0">
           <!-- Success Pop-up Modal -->
           <transition
             enter-active-class="transition duration-300 ease-out"

@@ -36,8 +36,9 @@ class CalendarController extends Controller
         }
         
         foreach ($schedules->get() as $jadwal) {
+            $title = $roomId ? 'Kuliah: ' . $jadwal->course_name : '[' . $jadwal->room_code . '] ' . $jadwal->course_name;
             $events[] = [
-                'title' => 'Kuliah: ' . $jadwal->course_name,
+                'title' => $title,
                 'start' => $jadwal->schedule_date . 'T' . $jadwal->start_time,
                 'end'   => $jadwal->schedule_date . 'T' . $jadwal->end_time,
                 'color' => '#dc3545', // Merah untuk kuliah
@@ -46,7 +47,7 @@ class CalendarController extends Controller
         }
 
         // 2. AMBIL DATA BOOKING LOKAL
-        $bookings = Booking::whereIn('status', ['pending', 'approved']);
+        $bookings = Booking::with('room')->whereIn('status', ['pending', 'approved']);
         
         if ($roomId) {
             $bookings->where('room_id', $roomId);
@@ -55,9 +56,11 @@ class CalendarController extends Controller
         foreach ($bookings->get() as $booking) {
             $bgColor = $booking->status === 'approved' ? '#198754' : '#ffc107';
             $txtColor = $booking->status === 'pending' ? '#000000' : '#ffffff';
+            $roomCode = $booking->room->room_code ?? 'Ruangan';
+            $title = $roomId ? 'Peminjaman: ' . $booking->purpose : '[' . $roomCode . '] Peminjaman: ' . $booking->purpose;
 
             $events[] = [
-                'title' => 'Peminjaman: ' . $booking->purpose,
+                'title' => $title,
                 'start' => $booking->booking_date . 'T' . $booking->start_time,
                 'end'   => $booking->booking_date . 'T' . $booking->end_time,
                 'color' => $bgColor,

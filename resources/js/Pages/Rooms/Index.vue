@@ -119,14 +119,14 @@
           <div class="mt-6 pt-5 border-t border-slate-100 flex items-center justify-between gap-3">
             <button 
               @click="openDetailModal(room)"
-              class="flex-1 px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs transition-all border border-slate-200/50 hover:border-slate-300 flex items-center justify-center gap-1.5 cursor-pointer"
+              class="flex-1 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs transition-all border border-slate-200/50 hover:border-slate-300 flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               Detail Ruangan
             </button>
             <Link 
               v-if="userRole !== 'admin'"
               :href="'/calendar?room_id=' + room.room_code"
-              class="flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/10 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              class="flex-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/10 hover:shadow-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               Pilih & Cek Jadwal
             </Link>
