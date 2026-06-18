@@ -19,7 +19,7 @@
         <Link 
           v-if="userRole !== 'admin'"
           href="/bookings/create" 
-          class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm shadow-md shadow-indigo-600/10 transition-colors cursor-pointer"
+          class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm shadow-md shadow-indigo-600/10 transition-colors cursor-pointer whitespace-nowrap"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -44,8 +44,14 @@
       </div>
     </div>
 
-    <!-- Calendar Container -->
-    <div class="bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/40 p-2 sm:p-6 mb-8 animate-fade-in-up stagger-2 overflow-hidden">
+    <div 
+      ref="scrollContainer"
+      @mousedown.capture="handleMouseDown"
+      @mouseleave.capture="handleMouseLeave"
+      @mouseup.capture="handleMouseUp"
+      @mousemove.capture="handleMouseMove"
+      class="w-full max-w-full bg-white/80 backdrop-blur-xl rounded-3xl border border-slate-200/60 shadow-lg shadow-slate-200/40 p-2 sm:p-6 mb-8 animate-fade-in-up stagger-2 overflow-x-auto cursor-grab active:cursor-grabbing select-none"
+    >
       <!-- Loading Indicator -->
       <div v-if="isLoading" class="absolute inset-0 bg-white/70 backdrop-blur-sm z-30 flex items-center justify-center rounded-3xl">
         <div class="flex flex-col items-center">
@@ -54,8 +60,15 @@
         </div>
       </div>
       
-      <!-- FullCalendar Component -->
-      <FullCalendar class="fc-premium-theme" :options="calendarOptions" />
+      <!-- Dynamic Width Styles for Overlapping Events -->
+      <component :is="'style'" type="text/css">
+        {{ dynamicStyles }}
+      </component>
+
+      <!-- FullCalendar Component inside horizontal scroll wrapper -->
+      <div class="min-w-[950px]" :style="calendarStyle">
+        <FullCalendar class="fc-premium-theme" :options="calendarOptions" />
+      </div>
     </div>
 
     <!-- Event Detail Modal -->
@@ -123,9 +136,130 @@ const events = ref([])
 const isLoading = ref(false)
 const selectedEvent = ref(null)
 
+// Drag-to-scroll variables & handlers
+const scrollContainer = ref(null)
+let isDown = false
+let startX = 0
+let scrollLeftVal = 0
+
+function handleMouseDown(e) {
+  // Only trigger drag scroll on left click
+  if (e.button !== 0) return
+  
+  // Do not trigger drag scroll if clicking input/select elements
+  if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('a')) {
+    return
+  }
+  
+  isDown = true
+  startX = e.pageX - scrollContainer.value.offsetLeft
+  scrollLeftVal = scrollContainer.value.scrollLeft
+}
+
+function handleMouseLeave() {
+  isDown = false
+}
+
+function handleMouseUp() {
+  isDown = false
+}
+
+function handleMouseMove(e) {
+  if (!isDown) return
+  e.preventDefault()
+  const x = e.pageX - scrollContainer.value.offsetLeft
+  const walk = (x - startX) * 1.5 // Scroll multiplier
+  scrollContainer.value.scrollLeft = scrollLeftVal - walk
+}
+
+
+const currentView = ref('dayGridMonth')
+const visibleStart = ref(null)
+const visibleEnd = ref(null)
+
+function handleDatesSet(arg) {
+  currentView.value = arg.view.type
+  visibleStart.value = arg.start
+  visibleEnd.value = arg.end
+}
+
+const calendarStyle = computed(() => {
+  if (currentView.value !== 'timeGridWeek') {
+    return { width: '100%' }
+  }
+  
+  // Base width: 7 days * 180px + 60px axis column
+  let totalWidth = 60 + (7 * 180)
+  
+  const eventsByDate = {}
+  
+  events.value.forEach(e => {
+    if (!e.start) return
+    const startMs = new Date(e.start).getTime()
+    
+    // Filter events to only calculate width for the visible week range
+    if (visibleStart.value && visibleEnd.value) {
+      if (startMs < visibleStart.value.getTime() || startMs >= visibleEnd.value.getTime()) {
+        return
+      }
+    }
+    
+    const startStr = typeof e.start === 'string' ? e.start : new Date(e.start).toISOString()
+    const dateStr = startStr.substring(0, 10) // YYYY-MM-DD
+    
+    if (!eventsByDate[dateStr]) {
+      eventsByDate[dateStr] = []
+    }
+    eventsByDate[dateStr].push(e)
+  })
+  
+  Object.keys(eventsByDate).forEach(dateStr => {
+    const dayEvents = eventsByDate[dateStr]
+    
+    // Sweep-line algorithm
+    const points = []
+    dayEvents.forEach(e => {
+      if (!e.start || !e.end) return
+      const startMs = new Date(e.start).getTime()
+      const endMs = new Date(e.end).getTime()
+      
+      if (isNaN(startMs) || isNaN(endMs)) return
+      
+      points.push({ time: startMs, type: 1 })
+      points.push({ time: endMs, type: -1 })
+    })
+    
+    points.sort((a, b) => {
+      if (a.time === b.time) {
+        return a.type - b.type // process ends before starts
+      }
+      return a.time - b.time
+    })
+    
+    let maxOverlap = 0
+    let currentOverlap = 0
+    points.forEach(p => {
+      currentOverlap += p.type
+      if (currentOverlap > maxOverlap) {
+        maxOverlap = currentOverlap
+      }
+    })
+    
+    if (maxOverlap > 1) {
+      // Add 180px extra width for each overlapping parallel sub-column
+      totalWidth += (maxOverlap - 1) * 180
+    }
+  })
+  
+  return {
+    width: `${totalWidth}px`
+  }
+})
+
 const calendarOptions = ref({
   plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
   initialView: 'dayGridMonth',
+  datesSet: handleDatesSet,
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
@@ -145,6 +279,7 @@ const calendarOptions = ref({
   slotMinTime: '07:00:00', // Typical campus start
   slotMaxTime: '22:00:00',
   allDaySlot: false,
+  slotEventOverlap: false,
   eventTimeFormat: {
     hour: '2-digit',
     minute: '2-digit',
@@ -194,6 +329,73 @@ function formatEventTime(start, end) {
   }
   return startStr
 }
+
+const dynamicStyles = computed(() => {
+  const eventsByDate = {}
+  
+  events.value.forEach(e => {
+    if (!e.start) return
+    // e.start can be a Date object or string. Let's make sure we have a string representation
+    const startStr = typeof e.start === 'string' ? e.start : new Date(e.start).toISOString()
+    const dateStr = startStr.substring(0, 10) // YYYY-MM-DD
+    
+    if (!eventsByDate[dateStr]) {
+      eventsByDate[dateStr] = []
+    }
+    eventsByDate[dateStr].push(e)
+  })
+  
+  let styles = ''
+  
+  Object.keys(eventsByDate).forEach(dateStr => {
+    const dayEvents = eventsByDate[dateStr]
+    
+    // Sweep-line algorithm to find max overlap (concurrency)
+    const points = []
+    dayEvents.forEach(e => {
+      if (!e.start || !e.end) return
+      const startMs = new Date(e.start).getTime()
+      const endMs = new Date(e.end).getTime()
+      
+      if (isNaN(startMs) || isNaN(endMs)) return
+      
+      points.push({ time: startMs, type: 1 })
+      points.push({ time: endMs, type: -1 })
+    })
+    
+    points.sort((a, b) => {
+      if (a.time === b.time) {
+        return a.type - b.type // process ends before starts (-1 before 1)
+      }
+      return a.time - b.time
+    })
+    
+    let maxOverlap = 0
+    let currentOverlap = 0
+    points.forEach(p => {
+      currentOverlap += p.type
+      if (currentOverlap > maxOverlap) {
+        maxOverlap = currentOverlap
+      }
+    })
+    
+    // We only need to adjust width if maxOverlap > 1
+    if (maxOverlap > 1) {
+      // Base width is 180px per overlapping slot
+      const calculatedWidth = maxOverlap * 180
+      
+      styles += `
+        .fc-premium-theme .fc-timeGridWeek-view td[data-date="${dateStr}"],
+        .fc-premium-theme .fc-timeGridWeek-view th[data-date="${dateStr}"] {
+          width: ${calculatedWidth}px !important;
+          min-width: ${calculatedWidth}px !important;
+        }
+      `
+    }
+  })
+  
+  return styles
+})
 
 onMounted(() => {
   fetchEvents()
@@ -251,15 +453,35 @@ onMounted(() => {
 }
 .fc-premium-theme .fc-event {
   border: none;
-  border-radius: 0.375rem;
+  border-radius: 0px !important; /* Flat table cell look */
   padding: 0.1rem 0.25rem;
   font-weight: 600;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: none !important;
   transition: transform 0.2s;
   cursor: pointer;
+  font-size: 0.75rem;
+}
+.fc-premium-theme .fc-timegrid-event {
+  font-size: 0.7rem !important;
+  line-height: 1.2;
+  padding: 2px 4px !important;
+  border-radius: 0px !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important; /* Clean vertical border separator */
+  margin: 0 !important;
+}
+.fc-premium-theme .fc-timegrid-event-harness {
+  padding: 0 !important;
+}
+.fc-premium-theme .fc-timegrid-event .fc-event-main {
+  padding: 2px !important;
+}
+.fc-premium-theme .fc-timegrid-event .fc-event-title {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .fc-premium-theme .fc-event:hover {
-  transform: translateY(-1px) scale(1.02);
+  box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.1), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   z-index: 10;
   position: relative;
 }
@@ -267,5 +489,33 @@ onMounted(() => {
   color: #94a3b8;
   font-weight: 600;
   font-size: 0.75rem;
+}
+
+/* Base width for all week view columns to prevent squeezing and keep it uniform */
+.fc-premium-theme .fc-timeGridWeek-view td.fc-day,
+.fc-premium-theme .fc-timeGridWeek-view th.fc-day,
+.fc-premium-theme .fc-timeGridWeek-view td[data-date],
+.fc-premium-theme .fc-timeGridWeek-view th[data-date] {
+  min-width: 180px !important;
+  width: 180px !important;
+}
+
+
+/* Custom beautiful scrollbar for horizontal calendar scroll */
+.overflow-x-auto::-webkit-scrollbar {
+  height: 10px;
+}
+.overflow-x-auto::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  border: 2px solid #f8fafc;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 </style>
